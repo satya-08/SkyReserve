@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../services/api';
 import { Search, Calendar, MapPin, PlaneTakeoff, Armchair } from 'lucide-react';
 
 const Home = () => {
@@ -14,7 +14,7 @@ const Home = () => {
     const fetchFlights = async (searchParams = {}) => {
         setLoading(true);
         try {
-            const { data } = await axios.get('http://localhost:5000/api/flights', { params: searchParams });
+            const { data } = await api.get('/flights', { params: searchParams });
             setFlights(data);
         } catch (error) {
             console.error('Error fetching flights', error);
