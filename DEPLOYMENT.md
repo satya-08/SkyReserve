@@ -1,41 +1,27 @@
-# Deploying SkyReserve Web Application
+# Deploying SkyReserve Web Application (Single Platform)
 
-This guide summarizes how to deploy the SkyReserve platform as a robust Progressive Web App (PWA) onto Render (Backend) and Vercel (Frontend).
+This guide summarizes how to deploy the entire SkyReserve progressive web application (frontend and backend) to a single **Render** Web Service instance.
 
-## 1. Backend Deployment (Render)
+## Deployment Steps (Render)
 
-1. Provision an **Atlas MongoDB** database cluster and copy its connection URI.
-2. Sign up on [Render.com](https://render.com).
-3. Connect your repository and select the **Web Service** deployment.
-4. Set the Root Directory to `backend/`.
-5. Set Build Command to `npm install`.
-6. Set Start Command to `node server.js`.
-7. Configure the following Environment Variables:
-   - `PORT`: (Render will override this, but standard is `5000`)
-   - `MONGO_URI`: `mongodb+srv://<username>:<password>@cluster0...`
+1. **Database:** Ensure you have provisioned an **Atlas MongoDB** database cluster and copied its connection URI.
+2. **Platform:** Sign up or log into [Render.com](https://render.com).
+3. **Repository:** Connect your GitHub repository and select the **Web Service** deployment.
+4. **Configuration Details:**
+   - **Name:** `SkyReserve` (or your choice)
+   - **Root Directory:** *(leave blank / empty)*
+   - **Build Command:** `npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend`
+   - **Start Command:** `npm start --prefix backend`
+5. **Environment Variables:**
+   - `PORT`: `5000` (Render will override this automatically, but standard is `5000`)
+   - `NODE_ENV`: `production` (This triggers the backend to serve the compiled frontend!)
+   - `MONGO_URI`: `mongodb+srv://<username>:<password>@cluster0...` (Your MongoDB Atlas connection string)
    - `JWT_SECRET`: Generate a secure random string (e.g. `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
-8. Deploy the service and retrieve the public API URL (e.g., `https://skyreserve-api.onrender.com`).
+6. **Deploy:** Click "Create Web Service" and wait for the build to complete.
 
-## 2. Frontend Deployment (Vercel)
+### How it Works
+When deployed to production (triggered by `NODE_ENV=production`), the Node.js backend automatically assumes the responsibility of serving your React/Vite PWA via the static `frontend/dist/` directory.
 
-Vercel is optimal for the Vite/React frontend due to exceptional edge caching and automatic configurations.
-
-1. Create a `Vercel` account and import your repository.
-2. Set the Root Directory to `frontend/`.
-3. Vercel will automatically detect `Vite` and run `npm run build`.
-4. Ensure the `.env` variables or Vercel Environment UI sets the production API endpoint:
-   - `VITE_API_URL`: Replace local `http://localhost:5000` with your new Render URL (`https://skyreserve-api.onrender.com`).
-5. Vercel handles all `HTTPS` automatically. Since `vite-plugin-pwa` is installed, the Vercel build will successfully generate the `sw.js` and `workbox` bundle hashes inside your `dist/` directory.
-
-### PWA Configuration
-
-- Since the Frontend enforces `HTTPS` via Vercel, the PWA `Service Worker` will be fully secure and functional.
-- Static assets like Google Fonts are cached dynamically via the generated Workbox Runtime Caching strategies to ensure fast repeats and offline handling.
-- Manifest definitions (`logo.svg`, `theme-color: #2563eb`) are injected into the head.
-
-## Verification
-
-After deploying, navigate to the frontend URL on an Android or iOS device:
-- Click the "Install App" button inside the Navbar, or the browser's native "Add to Home Screen" pop-up.
-- The web app will install silently on the device exactly like a native app.
-- Open the resulting mobile app; you will see it run in Standalone mode with no browser URL Chrome element!
+- Your app will be accessible at the generated Render URL (e.g., `https://skyreserve-xxxx.onrender.com`).
+- The API endpoints map natively to `/api`.
+- The frontend will automatically route any browser page refreshes directly to the React application.
