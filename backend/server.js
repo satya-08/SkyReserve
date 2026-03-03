@@ -25,12 +25,18 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// API Routes
+app.use('/api/users', userRoutes);
+app.use('/api/flights', flightRoutes);
+app.use('/api/bookings', bookingRoutes);
+
 const __dirname = path.resolve();
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-  app.get('*', (req, res) =>
+  // Express 5 requires regex wildcard instead of '*' route
+  app.get(/(.*)/, (req, res) =>
     res.sendFile(path.resolve(__dirname, '../frontend', 'dist', 'index.html'))
   );
 } else {
@@ -38,11 +44,6 @@ if (process.env.NODE_ENV === 'production') {
     res.send('SkyReserve API is running');
   });
 }
-
-// API Routes
-app.use('/api/users', userRoutes);
-app.use('/api/flights', flightRoutes);
-app.use('/api/bookings', bookingRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
